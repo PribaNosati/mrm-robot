@@ -4,6 +4,7 @@
 #include <mrm-bldc4x2.5.h>
 #include <mrm-can-bus.h>
 #include <mrm-col-can.h>
+#include <mrm-fet-can.h>
 #include <mrm-imu.h>
 #include <mrm-pid.h>
 #include <mrm-ir-finder2.h>
@@ -105,6 +106,7 @@ Robot::Robot(char name[15]) {
 	mrm_bldc2x50 = new Mrm_bldc2x50(this);
 	mrm_bldc4x2_5 = new Mrm_bldc4x2_5(this);
 	mrm_col_can = new Mrm_col_can(this);
+	mrm_fet_can = new Mrm_fet_can(this);
 	mrm_imu = new Mrm_imu(this);
 	mrm_ir_finder2 = new Mrm_ir_finder2(this);
 	mrm_ir_finder_can = new Mrm_ir_finder_can(this);
@@ -122,13 +124,13 @@ Robot::Robot(char name[15]) {
 	mrm_us = new Mrm_us(this);
 
 	// 8x8 LED
-	mrm_8x8a->add("LED8x8-0");
+	mrm_8x8a->add((char*)"LED8x8-0");
 
 	// Motors mrm-bldc2x50
-	mrm_bldc2x50->add(false, "BL2x50-0");
-	mrm_bldc2x50->add(false, "BL2x50-1");
-	mrm_bldc2x50->add(false, "BL2x50-2");
-	mrm_bldc2x50->add(false, "BL2x50-3");
+	mrm_bldc2x50->add(false, (char*)"BL2x50-0");
+	mrm_bldc2x50->add(false, (char*)"BL2x50-1");
+	mrm_bldc2x50->add(false, (char*)"BL2x50-2");
+	mrm_bldc2x50->add(false, (char*)"BL2x50-3");
 
 	// LEDs
 	pinMode(2, OUTPUT);
@@ -137,16 +139,19 @@ Robot::Robot(char name[15]) {
 	digitalWrite(15, false);
 
 	// Motors mrm-bldc4x2.5
-	mrm_bldc4x2_5->add(false, "BL4x2.5-0");
-	mrm_bldc4x2_5->add(false, "BL4x2.5-1");
-	mrm_bldc4x2_5->add(false, "BL4x2.5-2");
-	mrm_bldc4x2_5->add(false, "BL4x2.5-3");
+	mrm_bldc4x2_5->add(false, (char*)"BL4x2.5-0");
+	mrm_bldc4x2_5->add(false, (char*)"BL4x2.5-1");
+	mrm_bldc4x2_5->add(false, (char*)"BL4x2.5-2");
+	mrm_bldc4x2_5->add(false, (char*)"BL4x2.5-3");
 
 	// Colors sensors mrm-col-can
-	mrm_col_can->add("Col-0");
-	mrm_col_can->add("Col-1");
-	mrm_col_can->add("Col-2");
-	mrm_col_can->add("Col-3");
+	mrm_col_can->add((char*)"Col-0");
+	mrm_col_can->add((char*)"Col-1");
+	mrm_col_can->add((char*)"Col-2");
+	mrm_col_can->add((char*)"Col-3");
+
+	// FET outputs
+	mrm_fet_can->add((char*)"FET-0");
 
 	// IMU
 	mrm_imu->add();
@@ -155,99 +160,100 @@ Robot::Robot(char name[15]) {
 	mrm_ir_finder2->add(34, 33);
 
 	// mrm-ir-finder-can
-	mrm_ir_finder_can->add("IRFind-0");
+	mrm_ir_finder_can->add((char*)"IRFind-0");
 
 	// mrm-ir-finder3
-	mrm_ir_finder3->add("IR3Fin-0");
+	mrm_ir_finder3->add((char*)"IR3Fin-0");
 
 	// Motors mrm-mot2x50
-	mrm_mot2x50->add(false, "Mot2x50-0");
-	mrm_mot2x50->add(false, "Mot2x50-1");
-	mrm_mot2x50->add(false, "Mot2x50-2");
-	mrm_mot2x50->add(false, "Mot2x50-3");
-	mrm_mot2x50->add(false, "Mot2x50-4");
-	mrm_mot2x50->add(false, "Mot2x50-5");
+	mrm_mot2x50->add(false, (char*)"Mot2x50-0");
+	mrm_mot2x50->add(false, (char*)"Mot2x50-1");
+	mrm_mot2x50->add(false, (char*)"Mot2x50-2");
+	mrm_mot2x50->add(false, (char*)"Mot2x50-3");
+	mrm_mot2x50->add(false, (char*)"Mot2x50-4");
+	mrm_mot2x50->add(false, (char*)"Mot2x50-5");
 
 	// Motors mrm-mot4x10
-	mrm_mot4x10->add(false, "Mot4x10-0");
-	mrm_mot4x10->add(false, "Mot4x10-1");
-	mrm_mot4x10->add(false, "Mot4x10-2");
-	mrm_mot4x10->add(false, "Mot4x10-3");
+	mrm_mot4x10->add(false, (char*)"Mot4x10-0");
+	mrm_mot4x10->add(false, (char*)"Mot4x10-1");
+	mrm_mot4x10->add(false, (char*)"Mot4x10-2");
+	mrm_mot4x10->add(false, (char*)"Mot4x10-3");
 
 	// Motors mrm-mot4x3.6can
-	mrm_mot4x3_6can->add(false, "Mot3.6-0");
-	mrm_mot4x3_6can->add(false, "Mot3.6-1");
-	mrm_mot4x3_6can->add(false, "Mot3.6-2");
-	mrm_mot4x3_6can->add(false, "Mot3.6-3");
+	mrm_mot4x3_6can->add(false, (char*)"Mot3.6-0");
+	mrm_mot4x3_6can->add(false, (char*)"Mot3.6-1");
+	mrm_mot4x3_6can->add(false, (char*)"Mot3.6-2");
+	mrm_mot4x3_6can->add(false, (char*)"Mot3.6-3");
 
-	mrm_mot4x3_6can->add(false, "Mot3.6-4");
-	mrm_mot4x3_6can->add(false, "Mot3.6-5");
-	mrm_mot4x3_6can->add(false, "Mot3.6-6");
-	mrm_mot4x3_6can->add(false, "Mot3.6-7");
+	mrm_mot4x3_6can->add(false, (char*)"Mot3.6-4");
+	mrm_mot4x3_6can->add(false, (char*)"Mot3.6-5");
+	mrm_mot4x3_6can->add(false, (char*)"Mot3.6-6");
+	mrm_mot4x3_6can->add(false, (char*)"Mot3.6-7");
 
 	// Lidars mrm-lid-can-b, VL53L0X, 2 m
-	mrm_lid_can_b->add("Lidar2m-0");
-	mrm_lid_can_b->add("Lidar2m-1");
-	mrm_lid_can_b->add("Lidar2m-2");
-	mrm_lid_can_b->add("Lidar2m-3");
-	mrm_lid_can_b->add("Lidar2m-4");
-	mrm_lid_can_b->add("Lidar2m-5");
-	mrm_lid_can_b->add("Lidar2m-6");
-	mrm_lid_can_b->add("Lidar2m-7");
-	mrm_lid_can_b->add("Lidar2m-8");
-	mrm_lid_can_b->add("Lidar2m-9");
-	mrm_lid_can_b->add("Lidar2m10");
-	mrm_lid_can_b->add("Lidar2m11");	
-	mrm_lid_can_b->add("Lidar2m12");
-	mrm_lid_can_b->add("Lidar2m13");
+	mrm_lid_can_b->add((char*)"Lidar2m-0");
+	mrm_lid_can_b->add((char*)"Lidar2m-1");
+	mrm_lid_can_b->add((char*)"Lidar2m-2");
+	mrm_lid_can_b->add((char*)"Lidar2m-3");
+	mrm_lid_can_b->add((char*)"Lidar2m-4");
+	mrm_lid_can_b->add((char*)"Lidar2m-5");
+	mrm_lid_can_b->add((char*)"Lidar2m-6");
+	mrm_lid_can_b->add((char*)"Lidar2m-7");
+	mrm_lid_can_b->add((char*)"Lidar2m-8");
+	mrm_lid_can_b->add((char*)"Lidar2m-9");
+	mrm_lid_can_b->add((char*)"Lidar2m10");
+	mrm_lid_can_b->add((char*)"Lidar2m11");	
+	mrm_lid_can_b->add((char*)"Lidar2m12");
+	mrm_lid_can_b->add((char*)"Lidar2m13");
 
 	// Lidars mrm-lid-can-b2, VL53L1X, 4 m
-	mrm_lid_can_b2->add("Lidar4m-0");
-	mrm_lid_can_b2->add("Lidar4m-1");
-	mrm_lid_can_b2->add("Lidar4m-2");
-	mrm_lid_can_b2->add("Lidar4m-3");
-	mrm_lid_can_b2->add("Lidar4m-4");
-	mrm_lid_can_b2->add("Lidar4m-5");
-	mrm_lid_can_b2->add("Lidar4m-6");
-	mrm_lid_can_b2->add("Lidar4m-7");
+	mrm_lid_can_b2->add((char*)"Lidar4m-0");
+	mrm_lid_can_b2->add((char*)"Lidar4m-1");
+	mrm_lid_can_b2->add((char*)"Lidar4m-2");
+	mrm_lid_can_b2->add((char*)"Lidar4m-3");
+	mrm_lid_can_b2->add((char*)"Lidar4m-4");
+	mrm_lid_can_b2->add((char*)"Lidar4m-5");
+	mrm_lid_can_b2->add((char*)"Lidar4m-6");
+	mrm_lid_can_b2->add((char*)"Lidar4m-7");
 
 	// CAN Bus node
-	mrm_node->add("Node-0");
-	mrm_node->add("Node-1");
+	mrm_node->add((char*)"Node-0");
+	mrm_node->add((char*)"Node-1");
 
 	// Reflective array
-	mrm_ref_can->add("RefArr-0");
-	mrm_ref_can->add("RefArr-1");
-	mrm_ref_can->add("RefArr-2");
-	mrm_ref_can->add("RefArr-3");
+	mrm_ref_can->add((char*)"RefArr-0");
+	mrm_ref_can->add((char*)"RefArr-1");
+	mrm_ref_can->add((char*)"RefArr-2");
+	mrm_ref_can->add((char*)"RefArr-3");
 
 	// Servo motors. Note that some pins are not appropriate for PWM (servo)
-	mrm_servo->add(18, "Servo1", 0, 300, 0.5, 2.5); // Data for mrm-rds5060-300
-	mrm_servo->add(19, "Servo2", 0, 300, 0.5, 2.5);
-	mrm_servo->add(16, "Servo3", 0, 300, 0.5, 2.5); 
-	mrm_servo->add(17, "Servo4", 0, 300, 0.5, 2.5);
+	mrm_servo->add(18, (char*)"Servo1", 0, 300, 0.5, 2.5); // Data for mrm-rds5060-300
+	mrm_servo->add(19, (char*)"Servo2", 0, 300, 0.5, 2.5);
+	mrm_servo->add(16, (char*)"Servo3", 0, 300, 0.5, 2.5); 
+	mrm_servo->add(17, (char*)"Servo4", 0, 300, 0.5, 2.5);
 
 
 	// Switch
-	mrm_switch->add(18, 19, "Switch");
+	mrm_switch->add(18, 19, (char*)"Switch");
 
 	// Thermal array
-	mrm_therm_b_can->add("Thermo-0");
-	mrm_therm_b_can->add("Thermo-1");
-	mrm_therm_b_can->add("Thermo-2");
-	mrm_therm_b_can->add("Thermo-3");
+	mrm_therm_b_can->add((char*)"Thermo-0");
+	mrm_therm_b_can->add((char*)"Thermo-1");
+	mrm_therm_b_can->add((char*)"Thermo-2");
+	mrm_therm_b_can->add((char*)"Thermo-3");
 
 	// Ultrasonic
-	mrm_us->add("US-0");
-	mrm_us->add("US-1");
-	mrm_us->add("US-2");
-	mrm_us->add("US-3");
+	mrm_us->add((char*)"US-0");
+	mrm_us->add((char*)"US-1");
+	mrm_us->add((char*)"US-2");
+	mrm_us->add((char*)"US-3");
 
 	// Add boards
 	add(mrm_8x8a);
 	add(mrm_bldc2x50);
 	add(mrm_bldc4x2_5);
 	add(mrm_col_can);
+	add(mrm_fet_can);
 	add(mrm_ir_finder3);
 	add(mrm_lid_can_b);
 	add(mrm_lid_can_b2);
@@ -313,9 +319,9 @@ void Robot::actionSet() {
 	else if (actionSw != NULL)
 		actionSet(actionSw);
 	else { // Check keyboard
-		if (Serial.available() || serialBT != NULL && serialBT->available()) {
+		if (Serial.available() || (serialBT != NULL && serialBT->available())) {
 			lastUserActionMs = millis();
-			uint8_t ch;
+			uint8_t ch = ' ';
 			if (Serial.available())
 				ch = Serial.read();
 			else
@@ -477,7 +483,7 @@ bool Robot::boardSelect(uint8_t selectedNumber, uint8_t *selectedBoardIndex, uin
 			if (board[boardNumber]->alive(deviceNumber)) {
 				if (currentCount == 0) {
 					if (++lastBoardAndIndex == selectedNumber) {
-						Board *selectedBoard = board[boardNumber];
+						// Board *selectedBoard = board[boardNumber];
 						*selectedDeviceIndex = deviceNumber;
 						*selectedBoardIndex = boardNumber;
 						*maxInput = board[boardNumber]->deadOrAliveCount() / board[boardNumber]->devicesOnASingleBoard() - 1;
@@ -645,7 +651,7 @@ void Robot::errors() {
 void Robot::firmwarePrint() {
 	for (uint8_t i = 0; i < _boardNextFree; i++) {
 		board[i]->firmwareRequest();
-		uint32_t startMs = millis();
+		// uint32_t startMs = millis();
 		delayMs(1);
 	}
 	end();
@@ -938,6 +944,7 @@ void Robot::messagePrint(CANBusMessage *msg, bool outbound) {
 /** Receives CAN Bus messages. 
 */
 void Robot::messagesReceive() {
+	#define REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN false
 	while (true) {
 		CANBusMessage* msg = mrm_can_bus->messageReceive();
 		if (msg == NULL) // No more messages
@@ -945,15 +952,18 @@ void Robot::messagesReceive() {
 		uint32_t id = msg->messageId;
 		if (_sniff)
 			messagePrint(msg, false);
+		#if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
 		bool any = false;
+		#endif
 		for (uint8_t boardId = 0; boardId < _boardNextFree; boardId++) {
 			if (board[boardId]->messageDecode(id, msg->data)) {
+				#if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
 				any = true;
 				break;
+				#endif
 			}
 		}
 
-#define REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN false
 #if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
 		if (!any)
 			print("Address device unknown: 0x%X\n\r", id);
@@ -1039,8 +1049,8 @@ uint16_t Robot::serialReadNumber(uint16_t timeoutFirst, uint16_t timeoutBetween,
 	uint32_t lastMs = millis();
 	uint32_t convertedNumber = 0;
 	bool any = false;
-	while (millis() - lastMs < timeoutFirst && !any || !onlySingleDigitInput && millis() - lastMs < timeoutBetween && any) {
-		if (Serial.available() || serialBT != NULL && serialBT->available()) {
+	while ((millis() - lastMs < timeoutFirst && !any) || (!onlySingleDigitInput && millis() - lastMs < timeoutBetween && any)) {
+		if (Serial.available() || (serialBT != NULL && serialBT->available())) {
 			uint8_t character = 0;
 			if (Serial.available())
 				character = Serial.read();
@@ -1201,7 +1211,7 @@ void Robot::thermoTest() {
 @return - true if break requested.
 */
 bool Robot::userBreak() {
-	if (/*switchOn() ||*/ Serial.available() || serialBT != NULL && serialBT->available()) {
+	if (/*switchOn() ||*/ Serial.available() || (serialBT != NULL && serialBT->available())) {
 		return true;
 	}
 	else

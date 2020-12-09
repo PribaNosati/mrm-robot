@@ -3,7 +3,7 @@
 #include <mrm-can-bus.h>
 
 #define ACTIONS_LIMIT 80 // Increase if more actions are needed.
-#define BOARDS_LIMIT 14 // Maximum number of different board types.
+#define BOARDS_LIMIT 15 // Maximum number of different board types.
 #define LED_ERROR 15 // mrm-esp32's pin number, hardware defined.
 #define LED_OK 2 // mrm-esp32's pin number, hardware defined.
 
@@ -14,6 +14,7 @@ class Mrm_bldc2x50;
 class Mrm_bldc4x2_5;
 class Mrm_can_bus;
 class Mrm_col_can;
+class Mrm_fet_can;
 class Mrm_imu;
 class Mrm_ir_finder2;
 class Mrm_ir_finder_can;
@@ -127,6 +128,7 @@ public:
 	Mrm_bldc2x50* mrm_bldc2x50;
 	Mrm_bldc4x2_5* mrm_bldc4x2_5;
 	Mrm_col_can* mrm_col_can;
+	Mrm_fet_can* mrm_fet_can;
 	Mrm_imu* mrm_imu;
 	Mrm_ir_finder2* mrm_ir_finder2;
 	Mrm_ir_finder3* mrm_ir_finder3;
@@ -145,7 +147,7 @@ public:
 
 	/**
 	*/
-	Robot(char name[15] = "MRMS robot");
+	Robot(char name[15] = (char*)"MRMS robot");
 
 	/** Add a new action to the collection of robot's possible actions.
 	@param action - the new action.

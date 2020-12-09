@@ -17,7 +17,7 @@
 	A menu-action changes menuLevel to its own, forcing all the actions with this menuLevel to be displayed. "|" lists action in many menus, for example 1 | 8 | 16.
 @param boardId - menu only for a specific board
 */
-ActionBase::ActionBase(Robot* robot, char shortcut[4], char text[20], uint8_t menuLevel, BoardId boardsId) {
+ActionBase::ActionBase(Robot* robot, const char shortcut[4], const char text[20], uint8_t menuLevel, BoardId boardsId) {
 	_robot = robot;
 	if (shortcut != 0)
 		strcpy(_shortcut, shortcut);

@@ -24,7 +24,7 @@ public:
 		A menu-action changes menuLevel to its own, forcing all the actions with this menuLevel to be displayed. "|" lists action in many menus, for example 1 | 16 | 16.
 	@param boardId - menu only for a specific board
 	*/
-	ActionBase(Robot* robot, char shortcut[4], char text[20], uint8_t menuLevel = 1, BoardId boardsId = ID_ANY);
+	ActionBase(Robot* robot, const char shortcut[4], const char text[20], uint8_t menuLevel = 1, BoardId boardsId = ID_ANY);
 
 	BoardId boardsId() { return _boardsId; }
 
