@@ -7,8 +7,8 @@
 #include <mrm-fet-can.h>
 #include <mrm-imu.h>
 #include <mrm-pid.h>
-#include <mrm-ir-finder2.h>
-#include <mrm-ir-finder-can.h>
+//#include <mrm-ir-finder2.h>
+//#include <mrm-ir-finder-can.h>
 #include <mrm-ir-finder3.h>
 #include <mrm-lid-can-b.h>
 #include <mrm-lid-can-b2.h>
@@ -108,8 +108,8 @@ Robot::Robot(char name[15]) {
 	mrm_col_can = new Mrm_col_can(this);
 	mrm_fet_can = new Mrm_fet_can(this);
 	mrm_imu = new Mrm_imu(this);
-	mrm_ir_finder2 = new Mrm_ir_finder2(this);
-	mrm_ir_finder_can = new Mrm_ir_finder_can(this);
+	//mrm_ir_finder2 = new Mrm_ir_finder2(this);
+	// mrm_ir_finder_can = new Mrm_ir_finder_can(this);
 	mrm_ir_finder3 = new Mrm_ir_finder3(this);
 	mrm_lid_can_b = new Mrm_lid_can_b(this);
 	mrm_lid_can_b2 = new Mrm_lid_can_b2(this);
@@ -156,11 +156,11 @@ Robot::Robot(char name[15]) {
 	// IMU
 	mrm_imu->add();
 
-	// mrm-ir-finder2
-	mrm_ir_finder2->add(34, 33);
+	// // mrm-ir-finder2
+	// mrm_ir_finder3->add(34, 33);
 
-	// mrm-ir-finder-can
-	mrm_ir_finder_can->add((char*)"IRFind-0");
+	// // mrm-ir-finder-can
+	// mrm_ir_finder_can->add((char*)"IRFind-0");
 
 	// mrm-ir-finder3
 	mrm_ir_finder3->add((char*)"IR3Fin-0");
@@ -750,7 +750,7 @@ void Robot::info() {
 	end();
 }
 
-/** Tests mrm-ir-finder-can, raw data.
+/** Tests mrm-ir-finder3, raw data.
 */
 void Robot::irFinder3Test() {
 	if (setup())
@@ -758,7 +758,7 @@ void Robot::irFinder3Test() {
 	mrm_ir_finder3->test();
 }
 
-/** Tests mrm-ir-finder-can, calculated data.
+/** Tests mrm-ir-finder3, calculated data.
 */
 void Robot::irFinder3TestCalculated() {
 	if (setup())
