@@ -3,8 +3,8 @@
 #include <mrm-col-can.h>
 #include <mrm-imu.h>
 #include <mrm-node.h>
-#include <mrm-ir-finder2.h>
-#include <mrm-ir-finder-can.h>
+#include <mrm-ir-finder3.h>
+//#include <mrm-ir-finder-can.h>
 #include <mrm-ref-can.h>
 #include <mrm-servo.h>
 #include <mrm-robot.h>
@@ -45,7 +45,7 @@ void ActionFirmware::perform() { _robot->firmwarePrint(); }
 void ActionFPS::perform() { _robot->fpsPrint(); }
 void ActionGoAhead::perform() { _robot->goAhead(); }
 void ActionI2CTest::perform() { _robot->i2cTest(); }
-void ActionIRFinderTest::perform() { _robot->mrm_ir_finder2->test(); }
+void ActionIRFinderTest::perform() { _robot->mrm_ir_finder3->test(); }
 void ActionIRFinderCanTest::perform() { _robot->irFinder3Test(); }
 void ActionIRFinderCanTestCalculated::perform() { _robot->irFinder3TestCalculated(); }
 void ActionIMUTest::perform() { _robot->mrm_imu->test(); }
