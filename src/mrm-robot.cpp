@@ -21,7 +21,7 @@
 #include <mrm-servo.h>
 #include <mrm-switch.h>
 #include <mrm-therm-b-can.h>
-#include <mrm-us.h>
+// #include <mrm-us.h>
 
 
 extern BluetoothSerial* serialBT;
@@ -121,7 +121,7 @@ Robot::Robot(char name[15]) {
 	mrm_servo = new Mrm_servo(this);
 	mrm_switch = new Mrm_switch(this);
 	mrm_therm_b_can = new Mrm_therm_b_can(this);
-	mrm_us = new Mrm_us(this);
+	// mrm_us = new Mrm_us(this);
 
 	// 8x8 LED
 	mrm_8x8a->add((char*)"LED8x8-0");
@@ -243,10 +243,10 @@ Robot::Robot(char name[15]) {
 	mrm_therm_b_can->add((char*)"Thermo-3");
 
 	// Ultrasonic
-	mrm_us->add((char*)"US-0");
-	mrm_us->add((char*)"US-1");
-	mrm_us->add((char*)"US-2");
-	mrm_us->add((char*)"US-3");
+	// mrm_us->add((char*)"US-0");
+	// mrm_us->add((char*)"US-1");
+	// mrm_us->add((char*)"US-2");
+	// mrm_us->add((char*)"US-3");
 
 	// Add boards
 	add(mrm_8x8a);
@@ -263,7 +263,7 @@ Robot::Robot(char name[15]) {
 	add(mrm_node);
 	add(mrm_ref_can);
 	add(mrm_therm_b_can);
-	add(mrm_us);
+	// add(mrm_us);
 }
 
 /** Add a new action to the collection of robot's possible actions.

@@ -29,7 +29,7 @@ class Mrm_ref_can;
 class Mrm_servo;
 class Mrm_switch;
 class Mrm_therm_b_can;
-class Mrm_us;
+//class Mrm_us;
 
 /** Base class for all robots.
 */
@@ -143,7 +143,7 @@ public:
 	Mrm_servo* mrm_servo;
 	Mrm_switch* mrm_switch;
 	Mrm_therm_b_can* mrm_therm_b_can;
-	Mrm_us* mrm_us;
+	// Mrm_us* mrm_us;
 
 	/**
 	*/
