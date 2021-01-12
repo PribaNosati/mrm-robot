@@ -1,6 +1,5 @@
 #pragma once
 #include <Arduino.h>
-#include <BluetoothSerial.h>
 #include <mrm-board.h>
 #include <mrm-ref-can.h>
 
@@ -304,4 +303,16 @@ class ActionThermoTest : public ActionBase {
 	void perform();
 public:
 	ActionThermoTest(Robot* robot) : ActionBase(robot, "the", "Test thermo", 1, ID_MRM_THERM_B_CAN) {}
+};
+
+class ActionUS_BTest : public ActionBase {
+	void perform();
+public:
+	ActionUS_BTest(Robot* robot) : ActionBase(robot, "uls", "Test ultras.", 1, ID_MRM_US_B) {}
+};
+
+class ActionUS1Test : public ActionBase {
+	void perform();
+public:
+	ActionUS1Test(Robot* robot) : ActionBase(robot, "ult", "Test ultras.", 1, ID_MRM_US1) {}
 };

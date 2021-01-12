@@ -22,30 +22,72 @@
 #include <mrm-switch.h>
 #include <mrm-therm-b-can.h>
 // #include <mrm-us.h>
+#include <mrm-us-b.h>
+#include <mrm-us1.h>
 
-
+#if RADIO == 1
 extern BluetoothSerial* serialBT;
+#endif
 
 /**
 */
-Robot::Robot(char name[15]) {
+Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 	Serial.begin(115200);
-	//serial = new BluetoothSerial();
+
 	if (strlen(name) > 15)
 		strcpy(errorMessage, "Name overflow");
 	strcpy(_name, name);
+
+	if (strlen(ssid) > 15)
+		strcpy(errorMessage, "SSID overflow");
+	strcpy(_ssid, ssid);
+
+	if (strlen(wiFiPassword) > 15)
+		strcpy(errorMessage, "WiFi pwd. overflow");
+	strcpy(_wiFiPassword, wiFiPassword);
+
+#if RADIO == 1
 	if (serialBT == NULL) {
 		serialBT = new BluetoothSerial(); // Additional serial port
 		serialBT->begin(_name); //Start Bluetooth. ESP32 - Bluetooth device name, choose one.
 	}
+#endif
 
 	delay(50);
 	print("%s started.\r\n", _name);
 
 	Wire.begin(); // Start I2C
+
+#if RADIO == 2
+	delay(100);
+	webServer = new WiFiServer(80);
+
+	  // Connect to Wi-Fi network with SSID and password
+	print("Connecting to %s", ssid);
+	WiFi.begin(ssid, wiFiPassword);
+	uint32_t startMs = millis();
+	bool ok = true;
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(200);
+		print(".");
+		if (millis() - startMs > 2000){
+			ok = false;
+			break;
+		}
+	}
+	if (ok){
+		// Print local IP address and start web server
+		print("\n\r");
+		print("WiFi connected.\n\r");
+		print("IP address: %i.%i.%i.%i\n\r", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3]);
+		webServer->begin();
+	}
+	else
+		print("\n\rWeb server not started.\n\r");
+#endif
 
 	mrm_can_bus = new Mrm_can_bus();
 
@@ -101,6 +143,8 @@ Robot::Robot(char name[15]) {
 	actionAdd(new ActionServoTest(this));
 	actionAdd(_actionStop);
 	actionAdd(new ActionThermoTest(this));
+	actionAdd(new ActionUS_BTest(this));
+	actionAdd(new ActionUS1Test(this));
 
 	mrm_8x8a = new Mrm_8x8a(this);
 	mrm_bldc2x50 = new Mrm_bldc2x50(this);
@@ -122,6 +166,8 @@ Robot::Robot(char name[15]) {
 	mrm_switch = new Mrm_switch(this);
 	mrm_therm_b_can = new Mrm_therm_b_can(this);
 	// mrm_us = new Mrm_us(this);
+	mrm_us_b = new Mrm_us_b(this);
+	mrm_us1 = new Mrm_us1(this);
 
 	// 8x8 LED
 	mrm_8x8a->add((char*)"LED8x8-0");
@@ -243,6 +289,8 @@ Robot::Robot(char name[15]) {
 	mrm_therm_b_can->add((char*)"Thermo-3");
 
 	// Ultrasonic
+	mrm_us_b->add((char*)"US-B-0");
+	mrm_us1->add((char*)"US1-0");
 	// mrm_us->add((char*)"US-0");
 	// mrm_us->add((char*)"US-1");
 	// mrm_us->add((char*)"US-2");
@@ -264,6 +312,8 @@ Robot::Robot(char name[15]) {
 	add(mrm_ref_can);
 	add(mrm_therm_b_can);
 	// add(mrm_us);
+	add(mrm_us_b);
+	add(mrm_us1);
 }
 
 /** Add a new action to the collection of robot's possible actions.
@@ -319,14 +369,20 @@ void Robot::actionSet() {
 	else if (actionSw != NULL)
 		actionSet(actionSw);
 	else { // Check keyboard
-		if (Serial.available() || (serialBT != NULL && serialBT->available())) {
+		bool btAvailable = false;
+#if RADIO == 1
+		btAvailable = serialBT != NULL && serialBT->available();
+#endif
+		if (Serial.available() || btAvailable) {
 			lastUserActionMs = millis();
 			uint8_t ch = ' ';
 			if (Serial.available())
 				ch = Serial.read();
+#if RADIO == 1
 			else
 				if (serialBT != NULL)
 					ch = serialBT->read();
+#endif
 
 			if (ch != 13) //if received data different from ascii 13 (enter)
 				uartRxCommandCumulative[uartRxCommandIndex++] = ch;	//add data to Rx_Buffer
@@ -997,6 +1053,7 @@ void Robot::noLoopWithoutThis() {
 	fpsUpdate(); // Measure FPS. Less than 30 - a bad thing.
 	verbosePrint(); // Print FPS and maybe some additional data
 	errors();
+	web();
 }
 
 /** Production test
@@ -1050,12 +1107,18 @@ uint16_t Robot::serialReadNumber(uint16_t timeoutFirst, uint16_t timeoutBetween,
 	uint32_t convertedNumber = 0;
 	bool any = false;
 	while ((millis() - lastMs < timeoutFirst && !any) || (!onlySingleDigitInput && millis() - lastMs < timeoutBetween && any)) {
-		if (Serial.available() || (serialBT != NULL && serialBT->available())) {
+		bool btAvailable = false;
+#if RADIO == 1
+		btAvailable = serialBT != NULL && serialBT->available();
+#endif
+		if (Serial.available() || btAvailable) {
 			uint8_t character = 0;
 			if (Serial.available())
 				character = Serial.read();
+#if RADIO == 1
 			else if (serialBT != NULL && serialBT->available())
 				character = serialBT->read();
+#endif
 			if (48 <= character && character <= 57) {
 				convertedNumber = convertedNumber * 10 + (character - 48);
 				any = true;
@@ -1068,8 +1131,10 @@ uint16_t Robot::serialReadNumber(uint16_t timeoutFirst, uint16_t timeoutBetween,
 	// Eat tail
 	while (Serial.available())
 		Serial.read();
+#if RADIO == 1
 	while (serialBT != NULL && serialBT->available())
 		serialBT->read();
+#endif
 
 	// Return result
 	if (any) {
@@ -1211,7 +1276,11 @@ void Robot::thermoTest() {
 @return - true if break requested.
 */
 bool Robot::userBreak() {
-	if (/*switchOn() ||*/ Serial.available() || (serialBT != NULL && serialBT->available())) {
+	bool btAvailable = false;
+#if RADIO == 1
+	btAvailable = serialBT != NULL && serialBT->available();
+#endif
+	if (/*switchOn() ||*/ Serial.available() || btAvailable) {
 		return true;
 	}
 	else
@@ -1236,15 +1305,77 @@ void Robot::verboseToggle() {
 	verbose = !verbose;
 };
 
-///** Print to all serial ports, pointer to list
-//*/
-//void Robot::vprint(const char* fmt, va_list argp) {
-//	if (strlen(fmt) >= 100)
-//		return;
-//	static char buffer[100];
-//	vsprintf(buffer, fmt, argp);
-//
-//	Serial.print(buffer);
-//	if (serialBT() != 0)
-//		serialBT()->print(buffer);
-//}
+#if RADIO == 2
+/** Web server
+*/
+void Robot::web(){
+	static uint32_t previousTime = 0;
+	static uint32_t currentTime = 0;
+	const uint16_t timeoutTime = 2000;
+	// Variable to store the HTTP request
+	String header;
+
+	WiFiClient client = webServer->available();   // Listen for incoming clients
+
+  	if (client) {                             // If a new client connects,
+		currentTime = millis();
+		previousTime = currentTime;
+		print("New Client.\n\r");          // print a message out in the serial port
+		String currentLine = "";                // make a String to hold incoming data from the client
+		while (client.connected() && currentTime - previousTime <= timeoutTime) {  // loop while the client's connected
+			currentTime = millis();
+			if (client.available()) {             // if there's bytes to read from the client,
+				char c = client.read();             // read a byte, then
+				print("%c", c);                    // print it out the serial monitor
+				header += c;
+				if (c == '\n') {                    // if the byte is a newline character
+					// if the current line is blank, you got two newline characters in a row.
+					// that's the end of the client HTTP request, so send a response:
+					if (currentLine.length() == 0) {
+						// HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+						// and a content-type so the client knows what's coming, then a blank line:
+						client.println("HTTP/1.1 200 OK");
+						client.println("Content-type:text/html");
+						client.println("Connection: close");
+						client.println();
+						
+						// Display the HTML web page
+						client.println("<!DOCTYPE html><html>");
+						client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+						client.println("<link rel=\"icon\" href=\"data:,\">");
+						// CSS to style the on/off buttons 
+						// Feel free to change the background-color and font-size attributes to fit your preferences
+						client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
+						client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
+						client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
+						client.println(".button2 {background-color: #555555;}</style></head>");
+						
+						// Web Page Heading
+						client.println("<body><h1>ESP32 Web Server</h1>");
+						
+						// Display current state, and ON/OFF buttons for GPIO 26  
+						client.println("<p>State </p>");
+
+						client.println("</body></html>");
+						
+						// The HTTP response ends with another blank line
+						client.println();
+						// Break out of the while loop
+						break;
+					} else { // if you got a newline, then clear currentLine
+						currentLine = "";
+					}
+				} else if (c != '\r') {  // if you got anything else but a carriage return character,
+					currentLine += c;      // add it to the end of the currentLine
+				}
+			}
+		}
+		// Clear the header variable
+		header = "";
+		// Close the connection
+		client.stop();
+		Serial.println("Client disconnected.");
+		Serial.println("");
+	}
+}
+#endif

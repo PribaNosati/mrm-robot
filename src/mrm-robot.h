@@ -3,7 +3,7 @@
 #include <mrm-can-bus.h>
 
 #define ACTIONS_LIMIT 80 // Increase if more actions are needed.
-#define BOARDS_LIMIT 15 // Maximum number of different board types.
+#define BOARDS_LIMIT 16 // Maximum number of different board types.
 #define LED_ERROR 15 // mrm-esp32's pin number, hardware defined.
 #define LED_OK 2 // mrm-esp32's pin number, hardware defined.
 
@@ -30,6 +30,11 @@ class Mrm_servo;
 class Mrm_switch;
 class Mrm_therm_b_can;
 //class Mrm_us;
+class Mrm_us_b;
+class Mrm_us1;
+#if RADIO == 2
+#include "WiFi.h"
+#endif
 
 /** Base class for all robots.
 */
@@ -62,7 +67,12 @@ protected:
 	uint8_t menuLevel = 1; // Submenus have bigger numbers
 	char _name[16];
 	bool _sniff = false;
+	char _ssid[16];
 	bool verbose = false; // Verbose output
+#if RADIO == 2
+	WiFiServer* webServer;
+#endif
+	char _wiFiPassword[16];
 
 	/** Actually perform the action
 	*/
@@ -144,10 +154,12 @@ public:
 	Mrm_switch* mrm_switch;
 	Mrm_therm_b_can* mrm_therm_b_can;
 	// Mrm_us* mrm_us;
+	Mrm_us_b* mrm_us_b;
+	Mrm_us1* mrm_us1;
 
 	/**
 	*/
-	Robot(char name[15] = (char*)"MRMS robot");
+	Robot(char name[15] = (char*)"MRMS robot", char ssid[15] = (char*)"MRMS", char wiFiPassword[15] = (char*)"mrms");
 
 	/** Add a new action to the collection of robot's possible actions.
 	@param action - the new action.
@@ -400,4 +412,9 @@ public:
 	/** Verbose output toggle
 	*/
 	void verboseToggle();
+#if RADIO == 2
+	/** Web server
+	*/
+	void web();
+#endif
 };

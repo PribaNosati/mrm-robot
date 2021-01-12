@@ -8,6 +8,8 @@
 #include <mrm-ref-can.h>
 #include <mrm-servo.h>
 #include <mrm-robot.h>
+#include <mrm-us-b.h>
+#include <mrm-us1.h>
 
 /** Constructor
 @param robot - robot
@@ -70,3 +72,5 @@ void ActionServoInteractive::perform() { _robot->servoInteractive(); }
 void ActionServoTest::perform() { _robot->mrm_servo->test(); }
 void ActionStop::perform() { _robot->stopAll(); }
 void ActionThermoTest::perform() { _robot->thermoTest(); }
+void ActionUS_BTest::perform(){_robot->mrm_us_b->test();}
+void ActionUS1Test::perform(){_robot->mrm_us1->test();}
