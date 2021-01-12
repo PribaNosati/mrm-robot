@@ -1053,7 +1053,9 @@ void Robot::noLoopWithoutThis() {
 	fpsUpdate(); // Measure FPS. Less than 30 - a bad thing.
 	verbosePrint(); // Print FPS and maybe some additional data
 	errors();
+#if RADIO == 2
 	web();
+#endif
 }
 
 /** Production test
