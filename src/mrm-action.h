@@ -70,6 +70,17 @@ public:
 	ActionCANBusStress(Robot* robot) : ActionBase(robot, "all", "CAN Bus stress", 16) {}//1 | 2 | 4 | 8 | 16 | 32 | 64 | 128-> in all menus. 0 - in no menu.
 };
 
+class ActionColorBTest6Colors : public ActionBase {
+	void perform();
+public:
+	ActionColorBTest6Colors(Robot* robot) : ActionBase(robot, "10c", "Test 10 colors", 4, ID_MRM_COL_B) {}
+};
+
+class ActionColorBTestHSV : public ActionBase {
+	void perform();
+public:
+	ActionColorBTestHSV(Robot* robot) : ActionBase(robot, "hsv", "Test HSV", 4, ID_MRM_COL_B) {}
+};
 
 class ActionColorIlluminationOff : public ActionBase {
 	void perform();
@@ -213,6 +224,12 @@ class ActionMenuColor : public ActionBase {
 	void perform();
 public:
 	ActionMenuColor(Robot* robot) : ActionBase(robot, "col", "Color (menu)", 1, ID_MRM_COL_CAN) {}
+};
+
+class ActionMenuColorB : public ActionBase {
+	void perform();
+public:
+	ActionMenuColorB(Robot* robot) : ActionBase(robot, "col", "Color (menu)", 1, ID_MRM_COL_B) {}
 };
 
 class ActionMenuMain : public ActionBase {

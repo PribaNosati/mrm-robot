@@ -1,5 +1,6 @@
 #include <mrm-action.h>
 #include <mrm-8x8a.h>
+#include <mrm-col-b.h>
 #include <mrm-col-can.h>
 #include <mrm-imu.h>
 #include <mrm-node.h>
@@ -34,6 +35,8 @@ void ActionBluetoothTest::perform() { _robot->bluetoothTest(); }
 void ActionCANBusScan::perform() { _robot->devicesScan(true); }
 void ActionCANBusSniff::perform() { _robot->canBusSniffToggle(); }
 void ActionCANBusStress::perform() { _robot->stressTest(); }
+void ActionColorBTest6Colors::perform() { _robot->mrm_col_b->test(false);}
+void ActionColorBTestHSV::perform() { _robot->mrm_col_b->test(true); }
 void ActionColorIlluminationOff::perform() { _robot->colorIlluminationOff(); }
 void ActionColorIlluminationOn::perform() { _robot->colorIlluminationOn(); }
 void ActionColorPatternErase::perform() { _robot->colorPatternErase(); }
@@ -57,6 +60,7 @@ void ActionLidar2mTest::perform() { _robot->lidar2mTest(); }
 void ActionLidar4mTest::perform() { _robot->lidar4mTest(); }
 void ActionLoop::perform() { _robot->loop(); }
 void ActionMenuColor::perform() { _robot->menuColor(); }
+void ActionMenuColorB::perform() { _robot->menuColor(); }
 void ActionMenuMain::perform() { _robot->menuMainAndIdle(); }
 void ActionMenuReflectance::perform() { _robot->menuReflectance(); }
 void ActionMenuSystem::perform() { _robot->menuSystem(); }

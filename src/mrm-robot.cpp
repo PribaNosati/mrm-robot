@@ -3,6 +3,7 @@
 #include <mrm-bldc2x50.h>
 #include <mrm-bldc4x2.5.h>
 #include <mrm-can-bus.h>
+#include <mrm-col-b.h>
 #include <mrm-col-can.h>
 #include <mrm-fet-can.h>
 #include <mrm-imu.h>
@@ -105,6 +106,8 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	actionAdd(new ActionCANBusScan(this));
 	actionAdd(new ActionCANBusSniff(this));
 	actionAdd(new ActionCANBusStress(this));
+	actionAdd(new ActionColorBTest6Colors(this));
+	actionAdd(new ActionColorBTestHSV(this));
 	actionAdd(new ActionColorIlluminationOff(this));
 	actionAdd(new ActionColorIlluminationOn(this));
 	actionAdd(new ActionColorPatternErase(this));
@@ -128,6 +131,7 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	actionAdd(new ActionLidarCalibrate(this));
 	actionAdd(_actionLoop);
 	actionAdd(new ActionMenuColor(this));
+	actionAdd(new ActionMenuColorB(this));
 	actionAdd(new ActionMenuMain(this));
 	actionAdd(new ActionMenuReflectance(this));
 	actionAdd(new ActionMenuSystem(this));
@@ -149,6 +153,7 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	mrm_8x8a = new Mrm_8x8a(this);
 	mrm_bldc2x50 = new Mrm_bldc2x50(this);
 	mrm_bldc4x2_5 = new Mrm_bldc4x2_5(this);
+	mrm_col_b = new Mrm_col_b(this);
 	mrm_col_can = new Mrm_col_can(this);
 	mrm_fet_can = new Mrm_fet_can(this);
 	mrm_imu = new Mrm_imu(this);
@@ -189,6 +194,10 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	mrm_bldc4x2_5->add(false, (char*)"BL4x2.5-1");
 	mrm_bldc4x2_5->add(false, (char*)"BL4x2.5-2");
 	mrm_bldc4x2_5->add(false, (char*)"BL4x2.5-3");
+
+	// Colors sensors mrm-col-b
+	mrm_col_b->add((char*)"Clr-0");
+	mrm_col_b->add((char*)"Clr-1");
 
 	// Colors sensors mrm-col-can
 	mrm_col_can->add((char*)"Col-0");
@@ -300,6 +309,7 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	add(mrm_8x8a);
 	add(mrm_bldc2x50);
 	add(mrm_bldc4x2_5);
+	add(mrm_col_b);
 	add(mrm_col_can);
 	add(mrm_fet_can);
 	add(mrm_ir_finder3);
@@ -314,6 +324,13 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	// add(mrm_us);
 	add(mrm_us_b);
 	add(mrm_us1);
+
+	_devicesAtStartup = devicesScan(true);
+	if (mrm_8x8a->alive()){
+		char buffer[7];
+		sprintf(buffer, "N:%i.", _devicesAtStartup);
+		mrm_8x8a->text(buffer);
+	}
 }
 
 /** Add a new action to the collection of robot's possible actions.
@@ -361,9 +378,9 @@ void Robot::actionSet() {
 
 	// If a button pressed, first execute its action
 	ActionBase* action8x8 = NULL;
-	if (mrm_8x8a->alive())
-		action8x8 = mrm_8x8a->actionCheck();
-	ActionBase* actionSw = mrm_switch->actionCheck();
+	if (mrm_8x8a->alive()) 
+		action8x8 = mrm_8x8a->actionCheck(); 
+	ActionBase* actionSw = mrm_switch->actionCheck(); 
 	if (action8x8 != NULL)
 		actionSet(action8x8);
 	else if (actionSw != NULL)
@@ -601,35 +618,50 @@ void Robot::canIdChange() {
 /** mrm-color-can illumination off
 */
 void Robot::colorIlluminationOff() {
-	mrm_col_can->illumination(0xFF, 0);
+	if (mrm_col_can->alive())
+		mrm_col_can->illumination(0xFF, 0);
+	else if (mrm_col_b->alive())
+		mrm_col_b->illumination(0xFF, 0);
 	end();
 }
 
 /** mrm-color-can illumination on
 */
 void Robot::colorIlluminationOn() {
-	mrm_col_can->illumination(0xFF, 1);
+	if (mrm_col_can->alive())
+		mrm_col_can->illumination(0xFF, 5);
+	else if (mrm_col_b->alive())
+		mrm_col_b->illumination(0xFF, 5);
 	end();
 }
 
 /** Erase HSV patterns
 */
 void Robot::colorPatternErase() {
-	mrm_col_can->patternErase();
+	if (mrm_col_can->alive())
+		mrm_col_can->patternErase();
+	else if (mrm_col_b->alive())
+		mrm_col_b->patternErase();
 	end();
 }
 
 /** Print HSV patterns
 */
 void Robot::colorPatternPrint() {
-	mrm_col_can->patternPrint();
+	if (mrm_col_can->alive())
+		mrm_col_can->patternPrint();
+	else if (mrm_col_b->alive())
+		mrm_col_b->patternPrint();
 	end();
 }
 
 /** Record HSV color patterns
 */
 void Robot::colorPatternRecord() {
-	mrm_col_can->patternsRecord();
+	if (mrm_col_can->alive())
+		mrm_col_can->patternsRecord();
+	else if (mrm_col_b->alive())
+		mrm_col_b->patternsRecord();
 	end();
 }
 
@@ -656,7 +688,9 @@ void Robot::delayMicros(uint16_t pauseMicros) {
 	uint32_t startMicros = micros();
 	do {
 		noLoopWithoutThis();
-	} while (micros() - startMicros < pauseMicros);
+		if (startMicros > micros()) // micros() will overflow after 72 min!
+			startMicros = 0; // In that case, reset the start time
+	} while (micros() < startMicros + pauseMicros);
 }
 
 /** Contacts all the CAN Bus devices and checks which one is alive.
@@ -739,7 +773,7 @@ void Robot::fpsPause() {
 */
 void Robot::fpsPrint() {
 	print("CAN peaks: %i received/s, %i sent/s\n\r", mrm_can_bus->messagesPeakReceived(), mrm_can_bus->messagesPeakSent());
-	print("Arduino: %i FPS, low peak: %i FPS\n\r", (int)fpsGet(), fpsTopGap == 1000000 ? 0 : (int)(1000000 / (float)fpsTopGap));
+	print("Arduino: %i FPS, low peak: %i FPS\n\r", (int)fpsGet(), fpsTopGap == 1000 ? 0 : (int)(1000 / (float)fpsTopGap));
 	for (uint8_t i = 0; i < _boardNextFree; i++) {
 		board[i]->fpsRequest();
 		uint32_t startMs = millis();
@@ -763,7 +797,7 @@ void Robot::fpsReset() {
 /** Updates data for FPS calculation
 */
 void Robot::fpsUpdate() {
-	fpsMs[fpsNextIndex] = micros();
+	fpsMs[fpsNextIndex] = millis(); // millis() will overflow after some time! Not taken into account here.
 	fpsNextIndex = (fpsNextIndex == 0 ? 1 : 0);
 	if (fpsMs[0] != 0 && fpsMs[1] != 0) {
 		uint32_t gap = (fpsNextIndex == 0 ? fpsMs[1] - fpsMs[0] : fpsMs[0] - fpsMs[1]);
@@ -905,8 +939,16 @@ void Robot::lidarCalibrate() {
 */
 void Robot::menu() {
 	// Print menu
-	if (_devicesScanBeforeMenu)
-		devicesScan(false);
+	if (_devicesScanBeforeMenu){
+		uint8_t cnt = devicesScan(false);
+		if (cnt > _devicesAtStartup)  // Late-booters
+			_devicesAtStartup = cnt;
+		else if (cnt < _devicesAtStartup){
+			print("%i devices instead of %i!\n\r", cnt, _devicesAtStartup);
+			if (mrm_8x8a->alive(0, false))
+				mrm_8x8a->text((char*)"Error. Cnt.");
+		}
+	}
 	print("\r\n");
 
 	bool any = false;
@@ -1002,17 +1044,17 @@ void Robot::messagePrint(CANBusMessage *msg, bool outbound) {
 void Robot::messagesReceive() {
 	#define REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN false
 	while (true) {
-		CANBusMessage* msg = mrm_can_bus->messageReceive();
-		if (msg == NULL) // No more messages
+		_msg = mrm_can_bus->messageReceive();
+		if (_msg == NULL) // No more messages
 			break;
-		uint32_t id = msg->messageId;
+		uint32_t id = _msg->messageId;
 		if (_sniff)
-			messagePrint(msg, false);
+			messagePrint(_msg, false);
 		#if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
 		bool any = false;
 		#endif
 		for (uint8_t boardId = 0; boardId < _boardNextFree; boardId++) {
-			if (board[boardId]->messageDecode(id, msg->data)) {
+ 			if (board[boardId]->messageDecode(id, _msg->data)) {
 				#if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
 				any = true;
 				break;
@@ -1020,10 +1062,10 @@ void Robot::messagesReceive() {
 			}
 		}
 
-#if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
-		if (!any)
-			print("Address device unknown: 0x%X\n\r", id);
-#endif
+// #if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
+// 		if (!any)
+// 			print("Address device unknown: 0x%X\n\r", id);
+// #endif
 	}
 }
 
@@ -1085,7 +1127,7 @@ void Robot::reflectanceArrayCalibrationPrint() {
 */
 void Robot::run() {
 	while (true) {
-		actionSet(); // Check if a key pressed and update current command buffer.
+		actionSet(); // Check if a key pressed and update current command buffer. 
 		if (_actionCurrent == NULL) // If last command finished, display menu.
 			menu();
 		else 
@@ -1206,6 +1248,7 @@ bool Robot::stressTest() {
 			char buffer[50];
 			sprintf(buffer, "%i devices.\n\r", totalCnt);
 			mrm_8x8a->text(buffer);
+			mrm_8x8a->activeCheckIfStartedSet(false); // This is not a normal state, but just not to disrupt the test.
 		}
 	}
 
