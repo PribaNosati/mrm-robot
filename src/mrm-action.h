@@ -205,7 +205,7 @@ public:
 class ActionLidar4mTest : public ActionBase {
 	void perform();
 public:
-	ActionLidar4mTest(Robot* robot) : ActionBase(robot, "li4", "Test li. 4m", 1, ID_MRM_LID_CAN_B2){}	
+	ActionLidar4mTest(Robot* robot) : ActionBase(robot, "li4", "Test li. 4m", 1, ID_MRM_LID_CAN_B2){}
 };
 
 class ActionLidarCalibrate : public ActionBase {

@@ -257,7 +257,7 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	mrm_lid_can_b->add((char*)"Lidar2m-8");
 	mrm_lid_can_b->add((char*)"Lidar2m-9");
 	mrm_lid_can_b->add((char*)"Lidar2m10");
-	mrm_lid_can_b->add((char*)"Lidar2m11");	
+	mrm_lid_can_b->add((char*)"Lidar2m11");
 	mrm_lid_can_b->add((char*)"Lidar2m12");
 	mrm_lid_can_b->add((char*)"Lidar2m13");
 
@@ -280,13 +280,6 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	mrm_ref_can->add((char*)"RefArr-1");
 	mrm_ref_can->add((char*)"RefArr-2");
 	mrm_ref_can->add((char*)"RefArr-3");
-
-	// Servo motors. Note that some pins are not appropriate for PWM (servo)
-	mrm_servo->add(18, (char*)"Servo1", 0, 300, 0.5, 2.5); // Data for mrm-rds5060-300
-	mrm_servo->add(19, (char*)"Servo2", 0, 300, 0.5, 2.5);
-	mrm_servo->add(16, (char*)"Servo3", 0, 300, 0.5, 2.5); 
-	mrm_servo->add(17, (char*)"Servo4", 0, 300, 0.5, 2.5);
-
 
 	// Switch
 	mrm_switch->add(18, 19, (char*)"Switch");
@@ -525,7 +518,7 @@ bool Robot::boardDisplayAndSelect(uint8_t *selectedBoardIndex, uint8_t* selected
 	bool found = false;
 	if (*lastBoardAndIndex > 0) {
 
-		// Choose device 
+		// Choose device
 		print("Enter board [1 - %i]: ", *lastBoardAndIndex);
 		uint16_t selectedNumber = serialReadNumber(15000, 500, *lastBoardAndIndex <= 9, *lastBoardAndIndex);
 		print("%i", selectedNumber);
@@ -694,7 +687,7 @@ void Robot::delayMicros(uint16_t pauseMicros) {
 }
 
 /** Contacts all the CAN Bus devices and checks which one is alive.
-@verbose - if true, print. 
+@verbose - if true, print.
 @return count
 */
 uint8_t Robot::devicesScan(bool verbose) {
@@ -977,6 +970,7 @@ void Robot::menu() {
 		print("Menu level %i empty.\r\n", menuLevel);
 	else
 		if (column != 1)
+			print("\r\n");
 
 	// Display errors
 	for (uint8_t deviceNumber = 0; deviceNumber < _boardNextFree; deviceNumber++)
@@ -1038,6 +1032,10 @@ void Robot::messagePrint(CANBusMessage *msg, bool outbound) {
 		print("\n\r");
 	}
 }
+
+													   
+							   
+		   
 
 /** Receives CAN Bus messages. 
 */
@@ -1127,7 +1125,7 @@ void Robot::reflectanceArrayCalibrationPrint() {
 */
 void Robot::run() {
 	while (true) {
-		actionSet(); // Check if a key pressed and update current command buffer. 
+		actionSet(); // Check if a key pressed and update current command buffer.
 		if (_actionCurrent == NULL) // If last command finished, display menu.
 			menu();
 		else 
@@ -1217,7 +1215,7 @@ void Robot::stopAll() {
 /** CAN Bus stress test
 */
 bool Robot::stressTest() {
-	const bool STOP_ON_ERROR = true;
+	const bool STOP_ON_ERROR = false;
 	const uint32_t LOOP_COUNT = 1000000;
 	const bool TRY_ONLY_ALIVE = true;
 
@@ -1361,6 +1359,8 @@ void Robot::web(){
 	String header;
 
 	WiFiClient client = webServer->available();   // Listen for incoming clients
+   
+
 
   	if (client) {                             // If a new client connects,
 		currentTime = millis();

@@ -69,6 +69,8 @@ protected:
 	uint8_t menuLevel = 1; // Submenus have bigger numbers
 	CANBusMessage* _msg;
 	char _name[16];
+	int16_t pitch;
+	int16_t roll;
 	bool _sniff = false;
 	char _ssid[16];
 	bool verbose = false; // Verbose output
@@ -136,7 +138,6 @@ protected:
 public:
 
 	Mrm_can_bus* mrm_can_bus; // CANBus interface
-
 	Mrm_8x8a* mrm_8x8a;
 	Mrm_bldc2x50* mrm_bldc2x50;
 	Mrm_bldc4x2_5* mrm_bldc4x2_5;
@@ -200,11 +201,6 @@ public:
 	/** Test Bluetooth
 	*/
 	void bluetoothTest();
-	
-	/** End current action
-	*/
-	void end() { actionEnd(); }
-
 
 	/** Display all the incomming and outcomming CAN Bus messages
 	*/
@@ -261,6 +257,10 @@ public:
 	/** Stops broadcasting of CAN Bus messages
 	*/
 	void devicesStop();
+
+	/** End current action
+	*/
+	void end() { actionEnd(); }
 
 	/** Displays errors and stops motors, if any.
 	*/
