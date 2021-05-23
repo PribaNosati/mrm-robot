@@ -30,6 +30,36 @@
 extern BluetoothSerial* serialBT;
 #endif
 
+/** Print to all serial ports
+@param fmt - C format string: 
+	%c - character,
+	%i - integer,
+	%s - string.
+@param ... - variable arguments
+*/
+void Robot::print(const char* fmt, ...) {
+	va_list argp;
+	va_start(argp, fmt);
+	vprint(fmt, argp);
+	va_end(argp);
+}
+
+
+/** Print to all serial ports, pointer to list
+*/
+void Robot::vprint(const char* fmt, va_list argp) {
+	if (strlen(fmt) >= 100)
+		return;
+	static char buffer[100];
+	vsprintf(buffer, fmt, argp);
+
+	Serial.print(buffer);
+#if RADIO == 1
+	if (serialBT != NULL)
+		serialBT->print(buffer);
+#endif
+}
+
 /**
 */
 Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
@@ -1124,14 +1154,19 @@ void Robot::reflectanceArrayCalibrationPrint() {
 /** Starts robot's program
 */
 void Robot::run() {
-	while (true) {
+	while (true) 
+		runOnce();
+}
+
+/** One pass of robot's program
+*/
+void Robot::runOnce(){
 		actionSet(); // Check if a key pressed and update current command buffer.
 		if (_actionCurrent == NULL) // If last command finished, display menu.
 			menu();
 		else 
 			actionProcess(); // Process current command. The command will be executed while currentCommand is not NULL. Here state maching processing occurs, too.
 		noLoopWithoutThis(); // Receive all CAN Bus messages. This call should be included in any loop, like here.
-	}
 }
 
 /** Reads serial ASCII input and converts it into an integer
@@ -1215,7 +1250,7 @@ void Robot::stopAll() {
 /** CAN Bus stress test
 */
 bool Robot::stressTest() {
-	const bool STOP_ON_ERROR = false;
+	const bool STOP_ON_ERROR = true;
 	const uint32_t LOOP_COUNT = 1000000;
 	const bool TRY_ONLY_ALIVE = true;
 

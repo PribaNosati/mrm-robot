@@ -2,6 +2,9 @@
 #include <mrm-action.h>
 #include <mrm-can-bus.h>
 #include <mrm-col-b.h>
+#if RADIO == 1
+#include <BluetoothSerial.h>
+#endif
 
 #define ACTIONS_LIMIT 80 // Increase if more actions are needed.
 #define BOARDS_LIMIT 25 // Maximum number of different board types.
@@ -42,7 +45,6 @@ class Mrm_us1;
 class Robot {
 
 protected:
-
 	ActionBase* _action[ACTIONS_LIMIT]; // Collection of all the robot's actions
 	uint8_t _actionNextFree = 0;
 
@@ -71,6 +73,9 @@ protected:
 	char _name[16];
 	int16_t pitch;
 	int16_t roll;
+	#if RADIO == 1
+	BluetoothSerial *serialBT = NULL;
+	#endif
 	bool _sniff = false;
 	char _ssid[16];
 	bool verbose = false; // Verbose output
@@ -131,11 +136,7 @@ protected:
 	*/
 	void verbosePrint();
 
-	/** Print to all serial ports, pointer to list
-	*/
-	void vprint(const char* fmt, va_list argp);
-
-public:
+public: 
 
 	Mrm_can_bus* mrm_can_bus; // CANBus interface
 	Mrm_8x8a* mrm_8x8a;
@@ -361,6 +362,15 @@ public:
 	*/
 	void oscillatorTest();
 
+	/** Print to all serial ports
+	@param fmt - C format string: 
+		%c - character,
+		%i - integer,
+		%s - string.
+	@param ... - variable arguments
+	*/
+	void print(const char* fmt, ...);
+
 	/** Prints mrm-ref-can* calibration data
 	*/
 	void reflectanceArrayCalibrationPrint();
@@ -368,6 +378,10 @@ public:
 	/** Starts robot's program
 	*/
 	void run();
+
+	/** One pass of robot's program
+	*/
+	void runOnce();
 
 	/** Reads serial ASCII input and converts it into an integer
 	@param timeoutFirst - timeout for first input
@@ -416,6 +430,11 @@ public:
 	/** Verbose output toggle
 	*/
 	void verboseToggle();
+	
+	/** Print to all serial ports, pointer to list
+	*/
+	void vprint(const char* fmt, va_list argp);
+
 #if RADIO == 2
 	/** Web server
 	*/
