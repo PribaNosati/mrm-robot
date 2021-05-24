@@ -375,13 +375,13 @@ public:
 	*/
 	void reflectanceArrayCalibrationPrint();
 
+	/** One pass of robot's program
+	*/
+	void refresh();
+
 	/** Starts robot's program
 	*/
 	void run();
-
-	/** One pass of robot's program
-	*/
-	void runOnce();
 
 	/** Reads serial ASCII input and converts it into an integer
 	@param timeoutFirst - timeout for first input

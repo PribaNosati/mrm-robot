@@ -1151,22 +1151,22 @@ void Robot::reflectanceArrayCalibrationPrint() {
 	end();
 }
 
-/** Starts robot's program
-*/
-void Robot::run() {
-	while (true) 
-		runOnce();
-}
-
 /** One pass of robot's program
 */
-void Robot::runOnce(){
+void Robot::refresh(){
 		actionSet(); // Check if a key pressed and update current command buffer.
 		if (_actionCurrent == NULL) // If last command finished, display menu.
 			menu();
 		else 
 			actionProcess(); // Process current command. The command will be executed while currentCommand is not NULL. Here state maching processing occurs, too.
 		noLoopWithoutThis(); // Receive all CAN Bus messages. This call should be included in any loop, like here.
+}
+
+/** Starts robot's program
+*/
+void Robot::run() {
+	while (true) 
+		refresh();
 }
 
 /** Reads serial ASCII input and converts it into an integer
