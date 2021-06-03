@@ -51,8 +51,8 @@ void ActionFPS::perform() { _robot->fpsPrint(); }
 void ActionGoAhead::perform() { _robot->goAhead(); }
 void ActionI2CTest::perform() { _robot->i2cTest(); }
 void ActionIRFinderTest::perform() { _robot->mrm_ir_finder3->test(); }
-void ActionIRFinderCanTest::perform() { _robot->irFinder3Test(); }
-void ActionIRFinderCanTestCalculated::perform() { _robot->irFinder3TestCalculated(); }
+void ActionIRFinderCanTest::perform() { _robot->mrm_ir_finder3->test();}
+void ActionIRFinderCanTestCalculated::perform() { _robot->mrm_ir_finder3->testCalculated(); }
 void ActionIMUTest::perform() { _robot->mrm_imu->test(); }
 void ActionInfo::perform() { _robot->info(); }
 void ActionLidarCalibrate::perform() { _robot->lidarCalibrate(); }

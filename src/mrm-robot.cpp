@@ -863,22 +863,6 @@ void Robot::info() {
 	end();
 }
 
-/** Tests mrm-ir-finder3, raw data.
-*/
-void Robot::irFinder3Test() {
-	if (setup())
-		mrm_ir_finder3->start();
-	mrm_ir_finder3->test();
-}
-
-/** Tests mrm-ir-finder3, calculated data.
-*/
-void Robot::irFinder3TestCalculated() {
-	if (setup())
-		mrm_ir_finder3->continuousReadingCalculatedDataStart();
-	mrm_ir_finder3->testCalculated();
-}
-
 /** Tests mrm-lid-can-b
 */
 void Robot::lidar2mTest() {

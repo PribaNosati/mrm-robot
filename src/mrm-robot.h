@@ -292,14 +292,6 @@ public:
 	*/
 	void info();
 
-	/** Tests mrm-ir-finder3, raw data.
-	*/
-	void irFinder3Test();
-
-	/** Tests mrm-ir-finder3, calculated data.
-	*/
-	void irFinder3TestCalculated();
-
 	/** Tests mrm-lid-can-b
 	*/
 	void lidar2mTest();

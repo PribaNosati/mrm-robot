@@ -181,13 +181,13 @@ public:
 class ActionIRFinderTest : public ActionBase {
 	void perform();
 public:
-	ActionIRFinderTest(Robot* robot) : ActionBase(robot, "irf", "Test ball analog", 1) {}
+	ActionIRFinderTest(Robot* robot) : ActionBase(robot, "irf", "Test ball analog", 1, ID_MRM_IR_FINDER_2) {}
 };
 
 class ActionIRFinderCanTest : public ActionBase {
 	void perform();
 public:
-	ActionIRFinderCanTest(Robot* robot) : ActionBase(robot, "irs", "Test ball every", 1, ID_MRM_IR_FINDER3) {}
+	ActionIRFinderCanTest(Robot* robot) : ActionBase(robot, "irs", "Test ball raw", 1, ID_MRM_IR_FINDER3) {}
 };
 
 class ActionIRFinderCanTestCalculated : public ActionBase {
