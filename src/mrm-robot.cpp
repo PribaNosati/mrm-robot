@@ -79,6 +79,7 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	if (strlen(wiFiPassword) > 15)
 		strcpy(errorMessage, "WiFi pwd. overflow");
 	strcpy(_wiFiPassword, wiFiPassword);
+	boardInfo = new BoardInfo();
 
 #if RADIO == 1
 	if (serialBT == NULL) {
@@ -716,16 +717,49 @@ void Robot::delayMicros(uint16_t pauseMicros) {
 	} while (micros() < startMicros + pauseMicros);
 }
 
-/** Contacts all the CAN Bus devices and checks which one is alive.
-@verbose - if true, print.
+/** Lists all the alive (responded to last ping) CAN Bus devices.
+@boardType - sensor, motor, or all boards
 @return count
 */
-uint8_t Robot::devicesScan(bool verbose) {
+void Robot::deviceInfo(uint8_t deviceGlobalOrdinalNumber, BoardInfo * deviceInfo, BoardType boardType){
+	uint8_t count = 0;
+	for (uint8_t boardKind = 0; boardKind < _boardNextFree; boardKind++){
+		if (boardType == ANY_BOARD || board[boardKind]->boardType() == boardType){ // Board types
+			for (uint8_t deviceNumber = 0; deviceNumber < board[boardKind]->count(); deviceNumber++){// Devices for the current board type
+				if (board[boardKind]->alive(deviceNumber)){
+					if (count == deviceGlobalOrdinalNumber)
+					{
+						strcpy(deviceInfo->name, board[boardKind]->name(deviceNumber));
+						deviceInfo->board = board[boardKind];
+						deviceInfo->deviceNumber = deviceNumber;
+						//print("In func: %s %i", deviceInfo->name, deviceNumber);
+						if (boardType == SENSOR_BOARD)
+							deviceInfo->readingsCount = ((SensorBoard*)(board[boardKind]))->readingsCount();
+						return;
+					}
+					else
+						count++;
+				}
+			}
+		}
+	}
+	strcpy(deviceInfo->name, "");
+	deviceInfo->readingsCount = 0;
+}
+
+/** Contacts all the CAN Bus devices and checks which one is alive.
+@verbose - if true, print.
+@boardType - sensor, motor, or all boards
+@return count
+*/
+uint8_t Robot::devicesScan(bool verbose, BoardType boardType) {
 	devicesStop();
 	uint8_t count = 0;
 	delayMs(50); // Read all the messages sent after stop.
-	for (uint8_t i = 0; i < _boardNextFree; i++)
-		count += board[i]->devicesScan(verbose);
+	for (uint8_t i = 0; i < _boardNextFree; i++){
+		if (boardType == ANY_BOARD || board[i]->boardType() == boardType)
+			count += board[i]->devicesScan(verbose);
+	}
 	if (verbose)
 		print("%i devices.\n\r", count);
 	end();
