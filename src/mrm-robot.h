@@ -121,6 +121,10 @@ protected:
 	*/
 	bool boardSelect(uint8_t selectedNumber, uint8_t *selectedBoardIndex, uint8_t* selectedDeviceIndex, uint8_t* maxInput);
 
+	/** Display number of CAN Bus devices using 8x8 display
+	*/
+	void devicesLEDCount();
+
 	/** Avoids FPS measuring in the next 2 cycles.
 	*/
 	void fpsPause();
