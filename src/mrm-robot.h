@@ -212,6 +212,11 @@ public:
 	*/
 	void canBusSniffToggle();
 
+	/** Detects if there is a gap in CAN Bus addresses' sequence of any device, like 0, 2, 3 (missing 1).
+	@return - is there a gap.
+	*/
+	bool canGap();
+
 	/** Change device's id
 	*/
 	void canIdChange();
@@ -258,7 +263,7 @@ public:
 
 	/** Contacts all the CAN Bus devices and checks which one is alive.
 	@verbose - if true, print.
-	@boardType - sensor, motor, or all boards
+	@boardType - sensor, motor, or all boards.
 	@return count
 	*/
 	uint8_t devicesScan(bool verbose, BoardType boardType = ANY_BOARD);

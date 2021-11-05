@@ -629,6 +629,16 @@ void Robot::canBusSniffToggle() {
 	end();
 }
 
+/** Detects if there is a gap in CAN Bus addresses' sequence of any device, like 0, 2, 3 (missing 1).
+@return - is there a gap.
+*/
+bool Robot::canGap() {
+	for (uint8_t i = 0; i < _boardNextFree; i++)
+		if (board[i]->canGap())
+			return true;
+	return false;
+}
+
 /** Change device's id
 */
 void Robot::canIdChange() {
@@ -785,6 +795,8 @@ uint8_t Robot::devicesScan(bool verbose, BoardType boardType) {
 	}
 	if (verbose)
 		print("%i devices.\n\r", count);
+	if (canGap())
+		strcpy(errorMessage, "CAN gap");
 	end();
 	return count;
 }
