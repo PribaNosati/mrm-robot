@@ -70,7 +70,8 @@ void ActionMenuSystem::perform() { _robot->menuSystem(); }
 void ActionMotorTest::perform() { _robot->motorTest(); }
 void ActionNodeTest::perform() { _robot->nodeTest(); }
 void ActionNodeServoTest::perform() { _robot->mrm_node->servoTest();}
-//void ActionOscillatorTest::perform() { _robot->oscillatorTest(); }
+void ActionPnPOff::perform() { _robot->pnpOff();}
+void ActionPnPOn::perform() { _robot->pnpOn();}
 void ActionReflectanceArrayAnalogTest::perform() { _robot->mrm_ref_can->test(true); }
 void ActionReflectanceArrayDigitalTest::perform() { _robot->mrm_ref_can->test(false); }
 void ActionReflectanceArrayCalibrate::perform() { _robot->mrm_ref_can->calibrate(); }

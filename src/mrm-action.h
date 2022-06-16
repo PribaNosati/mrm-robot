@@ -97,7 +97,7 @@ public:
 class ActionColorBTestHSV : public ActionBase {
 	void perform();
 public:
-	ActionColorBTestHSV(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "hsv", "Test HSV", 4, ID_MRM_COL_B) {}
+	ActionColorBTestHSV(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "hs1", "Test HSV", 4, ID_MRM_COL_B) {}
 };
 
 class ActionColorIlluminationOff : public ActionBase {
@@ -151,7 +151,7 @@ public:
 class ActionDeviceIdChange : public ActionBase {
 	void perform();
 public:
-	ActionDeviceIdChange(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "idc", "Device's id change", 1) {}
+	ActionDeviceIdChange(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "idc", "Id change", 1) {}
 };
 
 class ActionDoNothing : public ActionBase {
@@ -259,7 +259,7 @@ public:
 class ActionMenuReflectance : public ActionBase {
 	void perform();
 public:
-	ActionMenuReflectance(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "ref", "Reflectance (menu)", 1, ID_MRM_REF_CAN) {}
+	ActionMenuReflectance(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "ref", "Reflect. (menu)", 1, ID_MRM_REF_CAN) {}
 };
 
 class ActionMenuSystem : public ActionBase {
@@ -291,6 +291,18 @@ public:
 //public:
 //	ActionOscillatorTest(Robot* robot) : ActionBase(robot, "osc", "Oscillator test", 1, ID_ANY) {}
 //};
+
+class ActionPnPOff : public ActionBase {
+	void perform();
+public:
+	ActionPnPOff(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "pof", "PnP off", 16) {}
+};
+
+class ActionPnPOn : public ActionBase {
+	void perform();
+public:
+	ActionPnPOn(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "pon", "PnP on", 16) {}
+};
 
 class ActionStop : public ActionBase {
 	void perform();

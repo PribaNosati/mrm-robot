@@ -2,12 +2,14 @@
 #include <mrm-action.h>
 #include <mrm-can-bus.h>
 #include <mrm-col-b.h>
+#include <Preferences.h>
 #if RADIO == 1
 #include <BluetoothSerial.h>
 #endif
 
 #define ACTIONS_LIMIT 80 // Increase if more actions are needed.
 #define BOARDS_LIMIT 25 // Maximum number of different board types.
+#define EEPROM_SIZE 12 // EEPROM size
 #define LED_ERROR 15 // mrm-esp32's pin number, hardware defined.
 #define LED_OK 2 // mrm-esp32's pin number, hardware defined.
 
@@ -73,12 +75,15 @@ protected:
 	CANBusMessage* _msg;
 	char _name[16];
 	int16_t pitch;
+	Preferences* preferences; // EEPROM
 	int16_t roll;
 	#if RADIO == 1
 	BluetoothSerial *serialBT = NULL;
 	#endif
 	bool _sniff = false;
 	char _ssid[16];
+	char uartRxCommandCumulative[24];
+	uint8_t uartRxCommandIndex = 0;
 	bool verbose = false; // Verbose output
 #if RADIO == 2
 	WiFiServer* webServer;
@@ -136,6 +141,11 @@ protected:
 	/** Resets FPS data
 	*/
 	void fpsReset();
+
+	/** Enable or disable plug and play for all the connected boards.
+	 @param enable - enable or disable
+	*/
+	void pnpSet(bool enable);
 
 	/** Prints additional data in every loop pass
 	*/
@@ -371,6 +381,14 @@ public:
 	*/
 	void oscillatorTest();
 
+	/** Enable plug and play for all the connected boards.
+	 */
+	void pnpOn();
+
+	/** Disable plug and play for all the connected boards.
+	 */
+	void pnpOff();
+
 	/** Print to all serial ports
 	@param fmt - C format string: 
 		%c - character,
@@ -401,6 +419,25 @@ public:
 	@return - converted number or 0xFFFF when timeout
 	*/
 	uint16_t serialReadNumber(uint16_t timeoutFirst = 3000, uint16_t timeoutBetween = 500, bool onlySingleDigitInput = false, uint16_t limit = 0xFFFE, bool printWarnings = true);
+
+	/**
+	 * @brief Number of characters in buffer
+	 * 
+	 * @return Number
+	 */
+	uint8_t serialDataCount(){return uartRxCommandIndex;}
+
+	/**
+	 * @brief Clear buffer
+	 */
+	void serialDataClear(){uartRxCommandIndex = 0;}
+
+	/**
+	 * @brief Returns serial buffer
+	 * 
+	 * @return buffer
+	 */
+	char* serialDataGet(){return uartRxCommandCumulative;}
 
 	/** Moves servo motor manually
 	*/

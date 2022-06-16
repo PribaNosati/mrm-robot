@@ -81,6 +81,10 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	strcpy(_wiFiPassword, wiFiPassword);
 	boardInfo = new BoardInfo();
 
+	// EEPROM, data retained after system powered down
+	preferences = new Preferences();
+	preferences->begin("data", false);
+
 #if RADIO == 1
 	if (serialBT == NULL) {
 		serialBT = new BluetoothSerial(); // Additional serial port
@@ -174,6 +178,8 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	actionAdd(new ActionNodeTest(this, signTest));
 	actionAdd(new ActionNodeServoTest(this, signTest));
 	//actionAdd(new ActionOscillatorTest(this));
+	actionAdd(new ActionPnPOff(this));
+	actionAdd(new ActionPnPOn(this));
 	actionAdd(new ActionReflectanceArrayCalibrate(this));
 	actionAdd(new ActionReflectanceArrayCalibrationPrint(this));
 	actionAdd(new ActionReflectanceArrayAnalogTest(this, signTest));
@@ -397,8 +403,6 @@ void Robot::actionProcess() {
 */
 void Robot::actionSet() {
 	static uint32_t lastUserActionMs = 0;
-	static uint8_t uartRxCommandIndex = 0;
-	static char uartRxCommandCumulative[10];
 	const uint16_t TIMEOUT_MS = 2000;
 
 	// If a button pressed, first execute its action
@@ -429,14 +433,20 @@ void Robot::actionSet() {
 			if (ch != 13) //if received data different from ascii 13 (enter)
 				uartRxCommandCumulative[uartRxCommandIndex++] = ch;	//add data to Rx_Buffer
 
-			if (ch == 13 || uartRxCommandIndex >= 3 || ch == 'x') //if received data = 13
+			if (ch == 13 || (uartRxCommandIndex >= 3 && !(uartRxCommandCumulative[0] == 'e' && uartRxCommandCumulative[1] == 's' && uartRxCommandCumulative[2] == 'c')) || ch == 'x' && uartRxCommandIndex == 1) //if received data = 13
 			{
-				uartRxCommandCumulative[uartRxCommandIndex] = 0;
-				uartRxCommandIndex = 0;
 
 				print("Command: %s", uartRxCommandCumulative);
 
 				uint8_t found = 0;
+				if (uartRxCommandCumulative[0] == 'e' && uartRxCommandCumulative[1] == 's' && uartRxCommandCumulative[2] == 'c'){
+					found = 1;
+				}
+				else{
+					uartRxCommandCumulative[uartRxCommandIndex] = 0;
+					uartRxCommandIndex = 0;
+				}
+
 				for (uint8_t i = 0; i < _actionNextFree; i++) {
 					if (strcmp(_action[i]->_shortcut, uartRxCommandCumulative) == 0) {
 						print(" ok.\r\n");
@@ -937,15 +947,16 @@ void Robot::info() {
 void Robot::lidar2mTest() {
 	static uint16_t selected;
 	if (setup()) {
+		//devicesScan(false, SENSOR_BOARD);
 		// Select lidar
 		uint8_t count = mrm_lid_can_b->deadOrAliveCount();
 		print("%s - enter lidar number [0-%i] or wait for all\n\r", mrm_lid_can_b->name(), count - 1);
-		selected = serialReadNumber(3000, 1000, count - 1 < 9, count - 1, false);
-		if (selected == 0xFFFF) {
+		selected = serialReadNumber(2000, 1000, count - 1 < 9, count - 1, false);
+		if (selected == 0xFFFF) { // Test all
 			print("Test all\n\r");
 			selected = 0xFF;
 		}
-		else {
+		else { // Test only selected
 			if (mrm_lid_can_b->alive(selected))
 				print("\n\rTest lidar %s\n\r", mrm_lid_can_b->name(selected));
 			else {
@@ -1040,7 +1051,7 @@ void Robot::menu() {
 					if (board[j]->alive(0xFF) && board[j]->id() == _action[i]->boardsId())
 						anyAlive = true;
 			if (anyAlive) {
-				print("%-3s - %-19s%s", _action[i]->_shortcut, _action[i]->_text, column == maxColumns ? "\n\r" : "");
+				print("%-3s - %-15s%s", _action[i]->_shortcut, _action[i]->_text, column == maxColumns ? "\n\r" : ""); // -19
 				delayMs(2);
 				any = true;
 				if (column++ == maxColumns)
@@ -1135,7 +1146,7 @@ void Robot::messagesReceive() {
 		bool any = false;
 		#endif
 		for (uint8_t boardId = 0; boardId < _boardNextFree; boardId++) {
- 			if (board[boardId]->messageDecode(id, _msg->data)) {
+ 			if (board[boardId]->messageDecode(id, _msg->data, _msg->dlc)) {
 				#if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
 				any = true;
 				break;
@@ -1196,6 +1207,43 @@ void Robot::oscillatorTest() {
 	}
 }
 
+/** Enable plug and play for all the connected boards.
+ */
+void Robot::pnpOn(){
+	pnpSet(true);
+}
+
+/** Disable plug and play for all the connected boards.
+ */
+void Robot::pnpOff(){
+	pnpSet(false);
+}
+
+/** Enable or disable plug and play for all the connected boards.
+ @param enable - enable or disable
+ */
+void Robot::pnpSet(bool enable){
+	uint8_t count = mrm_lid_can_b2->deadOrAliveCount();
+	for (uint8_t i = 0; i < count; i++)
+		if (mrm_lid_can_b2->alive(i)){
+			mrm_lid_can_b2->pnpSet(enable, i);
+			print("%s PnP %s\n\r", mrm_lid_can_b2->name(i), enable ? "on" : "off");
+		}
+	count = mrm_lid_can_b->deadOrAliveCount();
+	for (uint8_t i = 0; i < count; i++)
+		if (mrm_lid_can_b->alive(i)){
+			mrm_lid_can_b->pnpSet(enable, i);
+			print("%s PnP %s\n\r", mrm_lid_can_b->name(i), enable ? "on" : "off");
+		}
+			count = mrm_lid_can_b->deadOrAliveCount();
+	for (uint8_t i = 0; i < count; i++)
+		if (mrm_ref_can->alive(i)){
+			mrm_ref_can->pnpSet(enable, i);
+			print("%s PnP %s\n\r", mrm_ref_can->name(i), enable ? "on" : "off");
+		}
+	end();
+}
+
 /** Prints mrm-ref-can* calibration data
 */
 void Robot::reflectanceArrayCalibrationPrint() {
@@ -1221,6 +1269,7 @@ void Robot::run() {
 	while (true) 
 		refresh();
 }
+
 
 /** Reads serial ASCII input and converts it into an integer
 @param timeoutFirst - timeout for first input
