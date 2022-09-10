@@ -226,6 +226,12 @@ public:
 	ActionLidar4mTest(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "li4", "Test li. 4m", 1, ID_MRM_LID_CAN_B2){}
 };
 
+class ActionLidar4mMultiTest : public ActionBase {
+	void perform();
+public:
+	ActionLidar4mMultiTest(Robot* robot, LEDSign* ledSign = NULL) : ActionBase(robot, "lim", "Test li. mul", 1, ID_MRM_LID_D){}
+};
+
 class ActionLidarCalibrate : public ActionBase {
 	void perform();
 public:

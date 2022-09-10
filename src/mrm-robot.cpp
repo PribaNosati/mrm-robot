@@ -13,6 +13,7 @@
 #include <mrm-ir-finder3.h>
 #include <mrm-lid-can-b.h>
 #include <mrm-lid-can-b2.h>
+#include <mrm-lid-d.h>
 #include <mrm-mot2x50.h>
 #include <mrm-mot4x10.h>
 #include <mrm-mot4x3.6can.h>
@@ -167,6 +168,7 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	actionAdd(new ActionIRFinderCanTestCalculated(this, signTest));
 	actionAdd(new ActionLidar2mTest(this, signTest));
 	actionAdd(new ActionLidar4mTest(this, signTest));
+	actionAdd(new ActionLidar4mMultiTest(this, signTest));
 	actionAdd(new ActionLidarCalibrate(this));
 	actionAdd(_actionLoop);
 	actionAdd(new ActionMenuColor(this));
@@ -203,6 +205,7 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	mrm_ir_finder3 = new Mrm_ir_finder3(this);
 	mrm_lid_can_b = new Mrm_lid_can_b(this);
 	mrm_lid_can_b2 = new Mrm_lid_can_b2(this);
+	mrm_lid_d = new Mrm_lid_d(this);
 	mrm_mot2x50 = new Mrm_mot2x50(this);
 	mrm_mot4x3_6can = new Mrm_mot4x3_6can(this);
 	mrm_mot4x10 = new Mrm_mot4x10(this);
@@ -312,6 +315,10 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	mrm_lid_can_b2->add((char*)"Lidar4m-6");
 	mrm_lid_can_b2->add((char*)"Lidar4m-7");
 
+	// Lidars mrm-lid-can-b2, VL53L5X, 4 m multi
+	mrm_lid_d->add((char*)"LidMul-0");
+	// mrm_lid_d->add((char*)"LidMul-1");
+
 	// CAN Bus node
 	mrm_node->add((char*)"Node-0");
 	mrm_node->add((char*)"Node-1");
@@ -350,6 +357,7 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 	add(mrm_ir_finder3);
 	add(mrm_lid_can_b);
 	add(mrm_lid_can_b2);
+	add(mrm_lid_d);
 	add(mrm_mot2x50);
 	add(mrm_mot4x10);
 	add(mrm_mot4x3_6can);
@@ -480,7 +488,7 @@ void Robot::actionSet(ActionBase* newAction) {
 	_actionCurrent = newAction;
 	_actionCurrent->preprocessingStart();
 	// Display action on 8x8 LED
-	if (mrm_8x8a->alive()){
+	if (mrm_8x8a->alive() && _actionTextDisplay){
 		if (_actionCurrent->ledSign == NULL)
 			devicesLEDCount();
 		else if (_actionCurrent->ledSign->type == 1 && strcmp(((LEDSignText*)(_actionCurrent->ledSign))->text, "") != 0)
@@ -801,7 +809,8 @@ uint8_t Robot::devicesScan(bool verbose, BoardType boardType) {
 	delayMs(50); // Read all the messages sent after stop.
 	for (uint8_t i = 0; i < _boardNextFree; i++){
 		if (boardType == ANY_BOARD || board[i]->boardType() == boardType)
-			count += board[i]->devicesScan(verbose);
+			count += board[i]->devicesScan(verbose);// AAA
+			// print("SC1 %s ", board[i]->name()),count += board[i]->devicesScan(verbose), print("SC2");//AAA
 	}
 	if (verbose)
 		print("%i devices.\n\r", count);
@@ -907,6 +916,15 @@ void Robot::fpsUpdate() {
 			fpsTopGap = gap;
 	}
 }
+
+
+/**Compass
+@return - North is 0 degrees, clockwise are positive angles, values 0 - 360.
+*/
+float Robot::heading() {
+	return mrm_imu->heading();
+}
+
 
 /** Lists I2C devices
 */
@@ -1127,9 +1145,6 @@ void Robot::messagePrint(CANBusMessage *msg, bool outbound) {
 	}
 }
 
-													   
-							   
-		   
 
 /** Receives CAN Bus messages. 
 */
@@ -1207,6 +1222,15 @@ void Robot::oscillatorTest() {
 	}
 }
 
+
+/**Pitch
+@return - Pitch in degrees. Inclination forwards or backwards. Leveled robot shows 0 degrees.
+*/
+float Robot::pitch() {
+	return mrm_imu->pitch();
+}
+
+
 /** Enable plug and play for all the connected boards.
  */
 void Robot::pnpOn(){
@@ -1262,6 +1286,15 @@ void Robot::refresh(){
 			actionProcess(); // Process current command. The command will be executed while currentCommand is not NULL. Here state maching processing occurs, too.
 		noLoopWithoutThis(); // Receive all CAN Bus messages. This call should be included in any loop, like here.
 }
+
+
+/** Roll
+@return - Roll in degrees. Inclination to the left or right. Values -90 - 90. Leveled robot shows 0�.
+*/
+float Robot::roll() {
+	return mrm_imu->roll();
+}
+
 
 /** Starts robot's program
 */
