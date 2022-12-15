@@ -341,6 +341,11 @@ Robot::Robot(char name[15], char ssid[15], char wiFiPassword[15]) {
 
 	// Ultrasonic
 	mrm_us_b->add((char*)"US-B-0");
+	mrm_us_b->add((char*)"US-B-1");
+	mrm_us_b->add((char*)"US-B-2");
+	mrm_us_b->add((char*)"US-B-3");
+	mrm_us_b->add((char*)"US-B-4");
+
 	mrm_us1->add((char*)"US1-0");
 	// mrm_us->add((char*)"US-0");
 	// mrm_us->add((char*)"US-1");
@@ -809,8 +814,8 @@ uint8_t Robot::devicesScan(bool verbose, BoardType boardType) {
 	delayMs(50); // Read all the messages sent after stop.
 	for (uint8_t i = 0; i < _boardNextFree; i++){
 		if (boardType == ANY_BOARD || board[i]->boardType() == boardType)
-			count += board[i]->devicesScan(verbose);// AAA
-			// print("SC1 %s ", board[i]->name()),count += board[i]->devicesScan(verbose), print("SC2");//AAA
+			count += board[i]->devicesScan(verbose);
+			// print("SC1 %s ", board[i]->name()),count += board[i]->devicesScan(verbose), print("SC2");
 	}
 	if (verbose)
 		print("%i devices.\n\r", count);
@@ -1161,6 +1166,10 @@ void Robot::messagesReceive() {
 		bool any = false;
 		#endif
 		for (uint8_t boardId = 0; boardId < _boardNextFree; boardId++) {
+			// if (!strcmp(board[boardId]->name(), "US-B")){ 
+			// 	print ("BRD: %s\n\r", board[boardId]->name());
+			// 	messagePrint(_msg, false);
+			// }
  			if (board[boardId]->messageDecode(id, _msg->data, _msg->dlc)) {
 				#if REPORT_DEVICE_TO_DEVICE_MESSAGES_AS_UNKNOWN
 				any = true;
