@@ -9,11 +9,9 @@
 @param boardId - menu only for a specific board
 @param ledSign8x8 - the LED sign that will be displayed when action set to this one
 */
-ActionBase::ActionBase(Robot* robot, const char shortcut[4], const char text[20], uint8_t menuLevel, Board::BoardId boardsId,
+ActionBase::ActionBase(Robot* robot, const char text[20], uint8_t menuLevel, Board::BoardId boardsId,
 	Mrm_8x8a::LEDSign* ledSign8x8, void (Robot::*actionPerform)()) {
 	_robot = robot;
-	if (shortcut != 0)
-		strcpy(_shortcut, shortcut);
 	if (text != 0)
 		strcpy(_text, text);
 	_menuLevel = menuLevel;
